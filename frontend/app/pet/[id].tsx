@@ -1,28 +1,27 @@
 import React, { useCallback, useState } from "react";
-import { View, ScrollView, Pressable, useWindowDimensions } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
-import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/src/theme/useTheme";
 import { useData } from "@/src/store/DataContext";
-import { Display, Txt, Card, Badge, SectionHeader, Divider, AppButton, StatTile } from "@/src/components/ui";
 import { useToast } from "@/src/components/Toast";
 import { PetRepo, MedicationRepo, LogRepo } from "@/src/repositories";
 import { Pet, Medication, LogEntry } from "@/src/models/types";
 import { SPECIES_TEMPLATES } from "@/src/constants/species";
 import { latestWeight, weightDelta, computeAdherence } from "@/src/services/trends";
-import { formatWeight, relativeTime, LOG_META } from "@/src/utils/format";
+import { formatWeight } from "@/src/utils/format";
 import { pickPhoto } from "@/src/services/photos";
+
+import { PetHero } from "@/src/components/pet/PetHero";
+import { PetQuickActions } from "@/src/components/pet/PetQuickActions";
+import { Display, Txt, Card, Badge, SectionHeader, Divider, AppButton, StatTile } from "@/src/components/ui";
 
 export default function PetProfile() {
   const t = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { width } = useWindowDimensions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { activePet, setActivePet, bump, pets, refresh } = useData();
 
@@ -43,7 +42,6 @@ export default function PetProfile() {
   if (!pet) {
     return (
       <View style={{ flex: 1, backgroundColor: t.colors.surface, paddingTop: insets.top + 40, paddingHorizontal: 20 }}>
-        <Pressable onPress={() => router.back()} hitSlop={10}><Feather name="chevron-left" size={28} color={t.colors.onSurface} /></Pressable>
         <Txt style={{ marginTop: 20 }}>Loading…</Txt>
       </View>
     );
@@ -54,7 +52,7 @@ export default function PetProfile() {
   const delta = weightDelta(logs, 7);
   const adherence = computeAdherence(logs, meds, 14);
   const isActive = activePet?.id === pet.id;
-  const heroH = Math.min(width * 0.82, 360);
+  const activeMeds = meds.filter((m) => m.active);
 
   const changePhoto = async () => {
     const res = await pickPhoto();
@@ -73,15 +71,12 @@ export default function PetProfile() {
     toast.show(`${pet.name} is now active`, "success");
   };
 
-  const goHome = () => {
-    router.replace("/(tabs)");
-  };
+  const goHome = () => router.replace("/(tabs)");
 
-  // NEW FEATURE 1: Mark all today's medications as taken
+  // NEW FEATURE: Mark all today's medications as taken
   const markAllMedsToday = async () => {
     if (!activePet) return;
-    const todayDoses = meds.filter(m => m.active);
-    for (const med of todayDoses) {
+    for (const med of activeMeds) {
       await LogRepo.insert({
         petId: activePet.id,
         type: "medication",
@@ -91,7 +86,7 @@ export default function PetProfile() {
         dosageGiven: `${med.dosage} ${med.unit}`,
       });
     }
-    toast.show(`Marked ${todayDoses.length} medications as taken`, "success");
+    toast.show(`Marked ${activeMeds.length} medications as taken`, "success");
     bump();
     load();
   };
@@ -107,69 +102,25 @@ export default function PetProfile() {
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.surface }}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
-        {/* Hero */}
-        <View style={{ height: heroH }}>
-          {pet.photoUri ? (
-            <Image source={{ uri: pet.photoUri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-          ) : (
-            <View style={{ flex: 1, backgroundColor: t.colors.brandPrimary, alignItems: "center", justifyContent: "center" }}>
-              <Txt size={72}>{template.emoji}</Txt>
-            </View>
-          )}
-          <LinearGradient colors={["rgba(0,0,0,0.35)", "transparent", "rgba(0,0,0,0.75)"]} style={{ position: "absolute", inset: 0 }} />
-          <View style={{ position: "absolute", top: insets.top + 6, left: t.spacing.lg, right: t.spacing.lg, flexDirection: "row", justifyContent: "space-between" }}>
-            <Pressable testID="profile-back" onPress={() => router.back()} hitSlop={10} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "center", justifyContent: "center" }}>
-              <Feather name="chevron-left" size={26} color="#fff" />
-            </Pressable>
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Pressable testID="profile-change-photo" onPress={changePhoto} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "center", justifyContent: "center" }}>
-                <Feather name="camera" size={20} color="#fff" />
-              </Pressable>
-              <Pressable testID="profile-edit" onPress={() => router.push(`/add-pet?id=${pet.id}`)} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "center", justifyContent: "center" }}>
-                <Feather name="edit-2" size={18} color="#fff" />
-              </Pressable>
-            </View>
-          </View>
-          <View style={{ position: "absolute", left: t.spacing.lg, right: t.spacing.lg, bottom: t.spacing.lg }}>
-            {isActive && <View style={{ alignSelf: "flex-start", marginBottom: 8 }}><Badge label="Active pet" tone="success" /></View>}
-            <Display size={34} color="#FFFFFF">{pet.name}</Display>
-            <Txt size={14} color="rgba(255,255,255,0.9)" style={{ marginTop: 2 }}>
-              {template.emoji} {template.label}{pet.morph ? ` · ${pet.morph}` : ""}
-            </Txt>
-          </View>
-        </View>
+        <PetHero
+          pet={pet}
+          onBack={() => router.back()}
+          onChangePhoto={changePhoto}
+          onEdit={() => router.push(`/add-pet?id=${pet.id}`)}
+        />
 
         <View style={{ padding: t.spacing.lg }}>
-          {/* Quick actions */}
-          <View style={{ flexDirection: "row", gap: 10, marginBottom: t.spacing.lg }}>
-            <View style={{ flex: 1 }}>
-              <AppButton title="Log" icon="plus-circle" onPress={() => { if (!isActive) setActivePet(pet.id); router.push("/log"); }} testID="profile-log" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <AppButton title="Vet Report" icon="file-text" variant="outline" onPress={() => { if (!isActive) setActivePet(pet.id); router.push("/report"); }} testID="profile-report" />
-            </View>
-          </View>
-
-          {!isActive && (
-            <AppButton title="Make Active Pet" icon="check-circle" variant="ghost" onPress={makeActive} style={{ marginBottom: t.spacing.md }} testID="profile-make-active" />
-          )}
-
-          <AppButton
-            title="Back to Home"
-            icon="home"
-            variant="ghost"
-            onPress={goHome}
-            style={{ marginBottom: t.spacing.lg }}
+          <PetQuickActions
+            onLog={() => { if (!isActive) setActivePet(pet.id); router.push("/log"); }}
+            onVetReport={() => { if (!isActive) setActivePet(pet.id); router.push("/report"); }}
+            onBackToHome={goHome}
+            onMarkAllMeds={markAllMedsToday}
+            hasActiveMeds={activeMeds.length > 0}
+            activeMedCount={activeMeds.length}
           />
 
-          {/* NEW FEATURE: Mark all today's meds */}
-          {meds.filter(m => m.active).length > 0 && (
-            <AppButton
-              title={`Mark All ${meds.filter(m => m.active).length} Meds as Taken`}
-              icon="check-circle"
-              onPress={markAllMedsToday}
-              style={{ marginBottom: t.spacing.lg }}
-            />
+          {!isActive && (
+            <AppButton title="Make Active Pet" icon="check-circle" variant="ghost" onPress={makeActive} style={{ marginBottom: t.spacing.md }} />
           )}
 
           {/* Health metrics */}
@@ -191,19 +142,15 @@ export default function PetProfile() {
             </>
           )}
 
-          {pet.notes ? (
-            <Card style={{ marginBottom: t.spacing.lg }}>
-              <Txt size={13} color={t.colors.onSurfaceSecondary} style={{ lineHeight: 20 }}>{pet.notes}</Txt>
-            </Card>
-          ) : null}
+          {pet.notes ? <Card style={{ marginBottom: t.spacing.lg }}><Txt size={13} color={t.colors.onSurfaceSecondary} style={{ lineHeight: 20 }}>{pet.notes}</Txt></Card> : null}
 
           {/* Current medications */}
           <SectionHeader title="Current Medications" actionLabel="Manage" onAction={() => { if (!isActive) setActivePet(pet.id); router.push("/(tabs)/medications"); }} />
-          {meds.filter((m) => m.active).length === 0 ? (
+          {activeMeds.length === 0 ? (
             <Card style={{ marginBottom: t.spacing.lg }}><Txt size={13} color={t.colors.onSurfaceSecondary}>No active medications.</Txt></Card>
           ) : (
             <Card style={{ padding: 0, marginBottom: t.spacing.lg }}>
-              {meds.filter((m) => m.active).map((m, i) => (
+              {activeMeds.map((m, i) => (
                 <View key={m.id}>
                   {i > 0 && <Divider style={{ marginHorizontal: t.spacing.lg }} />}
                   <View style={{ flexDirection: "row", alignItems: "center", padding: t.spacing.lg, gap: 12 }}>
@@ -261,9 +208,8 @@ export default function PetProfile() {
             </Card>
           )}
 
-          {/* Danger zone */}
           {pets.length > 1 && (
-            <AppButton title="Delete Pet" icon="trash-2" variant="ghost" onPress={deletePet} fullWidth={false} style={{ alignSelf: "center", marginTop: t.spacing.xl }} testID="profile-delete" />
+            <AppButton title="Delete Pet" icon="trash-2" variant="ghost" onPress={deletePet} fullWidth={false} style={{ alignSelf: "center", marginTop: t.spacing.xl }} />
           )}
         </View>
       </ScrollView>
