@@ -22,7 +22,7 @@ export default function Dashboard() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { weightUnit, bump } = useData();
+  const { weightUnit, bump, pets, setActivePet } = useData();
   const { activePet, meds, logs, loading, reload } = usePetData();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -74,6 +74,18 @@ export default function Dashboard() {
     reload();
   };
 
+  const switchPet = () => {
+    if (pets.length > 1) {
+      // Simple cycle through pets for now
+      const currentIndex = pets.findIndex(p => p.id === activePet?.id);
+      const nextIndex = (currentIndex + 1) % pets.length;
+      setActivePet(pets[nextIndex].id);
+      Haptics.selectionAsync().catch(() => {});
+    } else {
+      router.push("/add-pet");
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.surface }}>
       {/* Sticky header with pet identity + settings */}
@@ -81,7 +93,7 @@ export default function Dashboard() {
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Pressable
             testID="dashboard-pet-header"
-            onPress={() => activePet && router.push(`/pet/${activePet.id}`)}
+            onPress={switchPet}
             style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: 12 }}
           >
             {activePet?.photoUri ? (
@@ -95,8 +107,11 @@ export default function Dashboard() {
               <Txt size={12} color={t.colors.onSurfaceTertiary}>{today}</Txt>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                 <Display size={22}>{activePet?.name}</Display>
-                <Feather name="chevron-right" size={18} color={t.colors.onSurfaceTertiary} />
+                {pets.length > 1 && <Feather name="chevron-down" size={18} color={t.colors.onSurfaceTertiary} />}
               </View>
+              {pets.length > 1 && (
+                <Txt size={11} color={t.colors.brandPrimary}>Tap to switch pet</Txt>
+              )}
             </View>
           </Pressable>
           <Pressable
@@ -189,7 +204,7 @@ export default function Dashboard() {
                       {d.med.dosage} {d.med.unit} · {timeLabel(d.time)}
                     </Txt>
                   </View>
-                  {!d.taken && <Txt size={12} weight="700" color={t.colors.brandPrimary}>Mark taken</Txt>}
+                  {!d.taken && <Txt size={12} weight="700" color={t.colors.brandPrimary}>Mark taken</Txt>
                 </Pressable>
               </View>
             ))}
@@ -251,7 +266,7 @@ function ActivityRow({ log, weightUnit }: { log: LogEntry; weightUnit: "g" | "kg
   let detail = "";
   if (log.type === "weight") detail = formatWeight(log.weightGrams, weightUnit);
   else if (log.type === "medication") detail = `${log.medicationName} · ${log.dosageGiven}`;
-  else if (log.type === "symptom") detail = `${log.symptom}${log.severity ? ` (sev ${log.severity}/5)` : ""}`;
+  else if (log.type === "symptom") detail = `${log.symptom}${log.severity ? ` (sev ${l.severity}/5)` : ""}`;
   else if (log.type === "husbandry") detail = `${log.tempF ?? "—"}°F · ${log.humidity ?? "—"}% RH`;
   else detail = log.note || "Note";
   return (
