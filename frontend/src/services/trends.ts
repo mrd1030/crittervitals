@@ -52,8 +52,15 @@ export function weightDelta(logs: LogEntry[], days = 7): number | null {
   return last.value - past.value;
 }
 
-// Fixed adherence calculation for last N days.
-// Expected = number of days in window * frequency per day (per active med)
+/**
+ * Calculates adherence over the last N days using a per-day maximum model.
+ * 
+ * For each day in the window:
+ *   - Calculate how many doses were *expected* that day per medication
+ *   - Sum across all days and medications
+ * 
+ * This matches the original intended behavior (daily max summed over the period).
+ */
 export function computeAdherence(
   logs: LogEntry[],
   meds: Medication[],
@@ -65,32 +72,63 @@ export function computeAdherence(
 
   const activeMeds = meds.filter((m) => m.active);
 
+  let totalExpected = 0;
+  const perMedMap = new Map<string, { taken: number; expected: number }();
+
+  // Initialize per-med tracking
+  activeMeds.forEach((m) => {
+    perMedMap.set(m.id, { taken: 0, expected: 0 });
+  });
+
+  // Loop through each day in the window
+  for (let i = 0; i < days; i++) {
+    const dayStart = new Date();
+    dayStart.setDate(dayStart.getDate() - i);
+    dayStart.setHours(0, 0, 0, 0);
+
+    const dayEnd = new Date(dayStart);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    activeMeds.forEach((m) => {
+      // Only count expected doses if the medication was active on this day
+      const medStart = new Date(m.startDate);
+      if (medStart > dayEnd) return; // medication not started yet on this day
+
+      const dailyExpected = m.frequencyPerDay;
+      const entry = perMedMap.get(m.id)!;
+      entry.expected += dailyExpected;
+      totalExpected += dailyExpected;
+    });
+  }
+
+  // Count actual taken doses in the window
+  const takenLogs = logs.filter(
+    (l) => l.type === "medication" && l.loggedAt >= cutoffIso
+  );
+
+  // Distribute taken counts per medication
+  takenLogs.forEach((log) => {
+    if (log.medicationId && perMedMap.has(log.medicationId)) {
+      perMedMap.get(log.medicationId)!.taken += 1;
+    }
+  });
+
   const perMed = activeMeds.map((m) => {
-    // Expected doses in the window = days * frequencyPerDay
-    const expected = days * m.frequencyPerDay;
-
-    const taken = logs.filter(
-      (l) =>
-        l.type === "medication" &&
-        l.medicationId === m.id &&
-        l.loggedAt >= cutoffIso,
-    ).length;
-
+    const data = perMedMap.get(m.id)!;
     return {
       name: m.name,
-      taken,
-      expected,
-      rate: expected > 0 ? Math.min(1, taken / expected) : 0,
+      taken: data.taken,
+      expected: data.expected,
+      rate: data.expected > 0 ? Math.min(1, data.taken / data.expected) : 0,
     };
   });
 
-  const expected = perMed.reduce((s, m) => s + m.expected, 0);
-  const taken = perMed.reduce((s, m) => s + m.taken, 0);
+  const taken = perMed.reduce((sum, m) => sum + m.taken, 0);
 
   return {
-    expected,
+    expected: totalExpected,
     taken,
-    rate: expected > 0 ? Math.min(1, taken / expected) : 0,
+    rate: totalExpected > 0 ? Math.min(1, taken / totalExpected) : 0,
     perMed,
   };
 }
