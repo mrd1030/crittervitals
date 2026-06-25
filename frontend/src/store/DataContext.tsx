@@ -2,14 +2,14 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { useColorScheme } from "react-native";
 import { storage } from "@/src/utils/storage";
 import { Pet } from "@/src/models/types";
-import { PetRepo } from "@/src/repositories";
+import { PetRepo, MedicationRepo, LogRepo, PhotoRepo } from "@/src/repositories";
 import { seedSampleData, isSeeded } from "@/src/db/seed";
 import { ThemeMode } from "@/src/theme/theme";
 
 const ACTIVE_PET_KEY = "cv_active_pet";
 const ONBOARDED_KEY = "cv_onboarded";
-const THEME_PREF_KEY = "cv_theme_pref"; // "light" | "dark" | "system"
-const WEIGHT_UNIT_KEY = "cv_weight_unit"; // "g" | "kg"
+const THEME_PREF_KEY = "cv_theme_pref";
+const WEIGHT_UNIT_KEY = "cv_weight_unit";
 
 type ThemePref = "light" | "dark" | "system";
 type WeightUnit = "g" | "kg";
@@ -29,6 +29,7 @@ interface DataContextValue {
   completeOnboarding: () => Promise<void>;
   setThemePref: (pref: ThemePref) => Promise<void>;
   setWeightUnit: (u: WeightUnit) => Promise<void>;
+  clearAllData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | undefined>(undefined);
@@ -59,7 +60,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      // First launch: seed rich sample data so the app is instantly useful.
       if (!(await isSeeded())) {
         await seedSampleData();
       }
@@ -95,6 +95,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setWeightUnitState(u);
   }, []);
 
+  // NEW: Clear all data and reset to fresh state
+  const clearAllData = useCallback(async () => {
+    await PetRepo.clearAll();
+    await MedicationRepo.clearAll();
+    await LogRepo.clearAll();
+    await PhotoRepo.clearAll();
+    await storage.removeItem(ACTIVE_PET_KEY);
+    await storage.removeItem(ONBOARDED_KEY);
+    setOnboarded(false);
+    setActivePetId(null);
+    setPets([]);
+    bump();
+  }, [bump]);
+
   const resolvedMode: ThemeMode =
     themePref === "system" ? (systemScheme === "dark" ? "dark" : "light") : themePref;
 
@@ -117,6 +131,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         completeOnboarding,
         setThemePref,
         setWeightUnit,
+        clearAllData,
       }}
     >
       {children}
