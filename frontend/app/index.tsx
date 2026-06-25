@@ -1,30 +1,20 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import { Redirect } from "expo-router";
+import { View, ActivityIndicator } from "react-native";
+import { useData } from "@/src/store/DataContext";
+import { palettes } from "@/src/theme/theme";
 
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
+// Routing gate: seed + load happen in DataProvider. Send users to onboarding
+// on first launch, otherwise straight into the app.
 export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+  const { loading, onboarded, resolvedMode } = useData();
+  const colors = palettes[resolvedMode];
 
-  return (
-    <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
-    </View>
-  );
+  if (loading) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.surface }}>
+        <ActivityIndicator color={colors.brandPrimary} size="large" />
+      </View>
+    );
+  }
+  return <Redirect href={onboarded ? "/(tabs)" : "/onboarding"} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
-  },
-});
