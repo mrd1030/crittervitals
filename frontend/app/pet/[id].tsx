@@ -10,9 +10,8 @@ import { useToast } from "@/src/components/Toast";
 import { PetRepo, MedicationRepo, LogRepo } from "@/src/repositories";
 import { Pet, Medication, LogEntry } from "@/src/models/types";
 import { SPECIES_TEMPLATES } from "@/src/constants/species";
-import { relativeTime } from "@/src/utils/date"; // Added
 import { latestWeight, weightDelta, computeAdherence } from "@/src/services/trends";
-import { formatWeight, LOG_META } from "@/src/utils/format";
+import { formatWeight, LOG_META, relativeTime } from "@/src/utils/format";
 import { pickPhoto } from "@/src/services/photos";
 
 import { PetHero } from "@/src/components/pet/PetHero";
