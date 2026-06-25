@@ -1,0 +1,195 @@
+{
+  "app_name": "CritterVitals",
+  "personality": "3 Editorial Mobile LIGHT",
+  "personality_one_liner": "A calm, trustworthy, and premium health journal for exotic pets, blending editorial elegance with warm, earthy tones to make daily care simple and reassuring.",
+  "color": {
+    "surface": "#FAF9F6",
+    "onSurface": "#1A1D1A",
+    "surfaceSecondary": "#F2EFE9",
+    "onSurfaceSecondary": "#3A3F3A",
+    "surfaceTertiary": "#E6E0D4",
+    "onSurfaceTertiary": "#4A504A",
+    "surfaceInverse": "#1A1D1A",
+    "onSurfaceInverse": "#FAF9F6",
+    "brand": "#2E5A3C",
+    "brandPrimary": "#2E5A3C",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#D87B5B",
+    "onBrandSecondary": "#FFFFFF",
+    "brandTertiary": "#EBF0EC",
+    "onBrandTertiary": "#1D3A26",
+    "success": "#3C6E47",
+    "onSuccess": "#FFFFFF",
+    "warning": "#D4A373",
+    "onWarning": "#3A2A18",
+    "error": "#B84A43",
+    "onError": "#FFFFFF",
+    "info": "#4A6B7C",
+    "onInfo": "#FFFFFF",
+    "border": "#E6E0D4",
+    "borderStrong": "#C2B8A3",
+    "divider": "#EAE4D9"
+  },
+  "typography": {
+    "displayFontFamily": "Playfair Display",
+    "textFontFamily": "Satoshi",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Use generous magazine-like rhythms with significant vertical breathing room to keep medical tracking calm and uncrowded. Avoid dense dashboard grids; use modular vertical stacks.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": "0",
+  "navigation": "bottom_tabs",
+  "icon_set": "Feather",
+  "glassmorphism": {
+    "enabled": false,
+    "do's": [
+      "Use tonal separation (surfaceSecondary) instead of glass to maintain the grounded, editorial feel."
+    ],
+    "dont's": [
+      "Do not use heavy blur or glass effects, as they clash with the tactile, paper-like editorial personality."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Onboarding",
+      "purpose": "Welcome users and set up their first pet profile with a calm, reassuring tone.",
+      "states": {
+        "loading": "Centered brand-colored spinner.",
+        "empty": "N/A",
+        "error": "Standard alert toast with 'Retry'."
+      },
+      "layout": "Full-bleed hero images (rabbit/dragon) at the top with a gradient scrim (transparent to surface). Large editorial display title. Bottom area contains species selection and 'Continue' button."
+    },
+    {
+      "name": "Dashboard (Home)",
+      "purpose": "Provide an immediate overview of pet health and a clear path to log today's data.",
+      "states": {
+        "loading": "Skeleton text and cards.",
+        "empty": "Illustration of terrarium/plants with 'Add your first pet to begin tracking' message.",
+        "error": "Readable error state with 'Retry' button."
+      },
+      "layout": "Top priority section with Daily Summary card and due medications list. Modular layout with generous padding. 'Log Today' must be a sticky primary CTA at the bottom above the tab bar, using a solid surface background container to overlay scrolling content."
+    },
+    {
+      "name": "Pet Profile",
+      "purpose": "Display pet details, current regimen, and health overview.",
+      "states": {
+        "loading": "Skeleton cover image and text.",
+        "empty": "N/A",
+        "error": "Error message with 'Reload Profile'."
+      },
+      "layout": "Hero banner photo of the pet with a vertical gradient scrim overlaying the pet name in a large display serif font. Below, health metrics and quick action chips (Edit, Export) arranged in a clean, single-column vertical stack."
+    },
+    {
+      "name": "Quick Log",
+      "purpose": "Allow fast, frictionless entry of daily weight, symptoms, medications, and husbandry notes.",
+      "states": {
+        "loading": "Submitting indicator on the button.",
+        "empty": "N/A",
+        "error": "Inline validation errors on fields."
+      },
+      "layout": "Single column form. Labels positioned above inputs. Use large touch targets (44pt+). Submit button is sticky at the bottom inside KeyboardAvoidingView."
+    },
+    {
+      "name": "Medications & Reminders",
+      "purpose": "Manage and track complex dosages, schedules, and adherence.",
+      "states": {
+        "loading": "Skeleton list items.",
+        "empty": "Icon with 'No medications scheduled. Add one below.'",
+        "error": "Error message with 'Retry'."
+      },
+      "layout": "Clean list view. Each item shows medication name, dosage (e.g., 0.1ml), and frequency. Uses subtle dividers. 'Add Medication' FAB or sticky bottom button."
+    },
+    {
+      "name": "Photo Journal",
+      "purpose": "Compare progression visually using side-by-side photo analysis.",
+      "states": {
+        "loading": "Skeleton image grid.",
+        "empty": "Minimalist icon prompt 'Add photos to track physical changes over time.'",
+        "error": "Error message with 'Reload Photos'."
+      },
+      "layout": "Split-Screen Synchronized View. Vertical split on mobile. Clear labels ('Before', 'After') above each half. A subtle central divider line. Grid below for browsing past photos."
+    },
+    {
+      "name": "Trends & Charts",
+      "purpose": "Visualize health data over time to spot issues early.",
+      "states": {
+        "loading": "Skeleton charts.",
+        "empty": "Icon prompt 'Not enough data. Log weight for a few days to see trends.'",
+        "error": "Error message with 'Reload Charts'."
+      },
+      "layout": "Clean line charts (e.g., weight over time with a distinct goal line) and bar charts for adherence. Use standard white/off-white cards for charts to ensure legibility."
+    },
+    {
+      "name": "Vet Report Generator",
+      "purpose": "Export precise logs and trends into a vet-ready PDF format.",
+      "states": {
+        "loading": "Generating PDF animation.",
+        "empty": "N/A",
+        "error": "Error message with 'Try again'."
+      },
+      "layout": "Simple configuration screen (Date range picker, toggles for what to include). Large 'Generate Report' CTA sticky at the bottom. Followed by a PDF preview."
+    }
+  ],
+  "images": {
+    "onboarding_dragon": {
+      "url": "https://images.unsplash.com/photo-1601491472415-1b4b4a689212?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwyfHxiZWFyZGVkJTIwZHJhZ29uJTIwY2xvc2UlMjB1cHxlbnwwfHx8fDE3ODIzNjIzMzB8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Close up of a brown and black bearded dragon"
+    },
+    "onboarding_rabbit": {
+      "url": "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA6MjJ8MHwxfHNlYXJjaHwxfHxjdXRlJTIwZmx1ZmZ5JTIwcmFiYml0JTIwcGV0fGVufDB8fHx8MTc4MjM2MjMzMHww&ixlib=rb-4.1.0&q=85",
+      "alt": "White rabbit on green grass"
+    },
+    "empty_state_terrarium": {
+      "url": "https://images.pexels.com/photos/185500/pexels-photo-185500.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "alt": "Top view of a succulent terrarium in a glass bowl"
+    }
+  },
+  "haptics": {
+    "button_press": "impactLight",
+    "tab_switch": "selection",
+    "log_submit_success": "notificationSuccess",
+    "photo_compare_sync": "impactLight"
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the 3 Editorial Mobile LIGHT personality. Interface should feel like a premium health journal (magazine-like spacing, paper-like surfaces, strong serif headings, clean sans-serif data).",
+    "NEVER use blues, purples, or indigos anywhere in the app (nuclear ban). Rely on the provided warm earthy tones (forest green, terracotta, soft gold).",
+    "Implement the 'Log Today' action as a sticky primary CTA on the Dashboard. It must sit at the bottom, above the tab bar, using a solid surface container over scrolling content.",
+    "For the Photo Journal screen, implement a side-by-side synchronized view with a vertical split, ensuring both images maintain aspect ratios and have clear 'Before'/'After' labels.",
+    "Onboarding and Profile screens must use the mandatory gradient-to-dark scrim pattern (transparent -> surfaceInverse) when placing text over images.",
+    "Include the required disclaimers about 'tracking tool only, not medical advice' prominently during Onboarding and in Settings.",
+    "Ensure large touch targets (min 44pt) across all interactive elements, especially in Quick Log and Medications sections."
+  ]
+}
