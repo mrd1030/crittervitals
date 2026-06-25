@@ -73,6 +73,10 @@ export default function PetProfile() {
     toast.show(`${pet.name} is now active`, "success");
   };
 
+  const goHome = () => {
+    router.replace("/(tabs)");
+  };
+
   const deletePet = async () => {
     await PetRepo.remove(pet.id);
     await refresh();
@@ -126,9 +130,19 @@ export default function PetProfile() {
               <AppButton title="Vet Report" icon="file-text" variant="outline" onPress={() => { if (!isActive) setActivePet(pet.id); router.push("/report"); }} testID="profile-report" />
             </View>
           </View>
+
           {!isActive && (
             <AppButton title="Make Active Pet" icon="check-circle" variant="ghost" onPress={makeActive} style={{ marginBottom: t.spacing.md }} testID="profile-make-active" />
           )}
+
+          {/* Go back to Home */}
+          <AppButton
+            title="Back to Home"
+            icon="home"
+            variant="ghost"
+            onPress={goHome}
+            style={{ marginBottom: t.spacing.lg }}
+          />
 
           {/* Health metrics */}
           <Card style={{ marginBottom: t.spacing.lg }}>
@@ -214,7 +228,6 @@ export default function PetProfile() {
                       </View>
                       <Txt size={11} color={t.colors.onSurfaceTertiary}>{relativeTime(l.loggedAt)}</Txt>
                     </View>
-                  </View>
                 );
               })}
             </Card>
