@@ -76,7 +76,6 @@ export default function Dashboard() {
 
   const switchPet = () => {
     if (pets.length > 1) {
-      // Simple cycle through pets for now
       const currentIndex = pets.findIndex(p => p.id === activePet?.id);
       const nextIndex = (currentIndex + 1) % pets.length;
       setActivePet(pets[nextIndex].id);
@@ -204,7 +203,11 @@ export default function Dashboard() {
                       {d.med.dosage} {d.med.unit} · {timeLabel(d.time)}
                     </Txt>
                   </View>
-                  {!d.taken && <Txt size={12} weight="700" color={t.colors.brandPrimary}>Mark taken</Txt>
+                  {!d.taken && (
+                    <Txt size={12} weight="700" color={t.colors.brandPrimary}>
+                      Mark taken
+                    </Txt>
+                  )}
                 </Pressable>
               </View>
             ))}
@@ -266,7 +269,7 @@ function ActivityRow({ log, weightUnit }: { log: LogEntry; weightUnit: "g" | "kg
   let detail = "";
   if (log.type === "weight") detail = formatWeight(log.weightGrams, weightUnit);
   else if (log.type === "medication") detail = `${log.medicationName} · ${log.dosageGiven}`;
-  else if (log.type === "symptom") detail = `${log.symptom}${log.severity ? ` (sev ${l.severity}/5)` : ""}`;
+  else if (log.type === "symptom") detail = `${log.symptom}${log.severity ? ` (sev ${log.severity}/5)` : ""}`;
   else if (log.type === "husbandry") detail = `${log.tempF ?? "—"}°F · ${log.humidity ?? "—"}% RH`;
   else detail = log.note || "Note";
   return (
