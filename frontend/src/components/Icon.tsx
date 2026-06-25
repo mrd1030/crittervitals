@@ -4,22 +4,35 @@ import { Feather } from "@expo/vector-icons";
 import { SymbolView, SymbolViewProps } from "expo-symbols";
 
 interface IconProps {
-  name: keyof typeof Feather.glyphMap;
+  name: string; // Feather name or SF Symbol name
   size?: number;
   color?: string;
   style?: any;
+  // For SF Symbols specific props
+  weight?: SymbolViewProps["weight"];
 }
 
 /**
- * Cross-platform icon component.
- * Uses SF Symbols (expo-symbols) on iOS for best quality,
- * falls back to Feather on Android and Web.
+ * Reliable cross-platform icon.
+ * - iOS: Uses native SF Symbols via expo-symbols (best quality + performance)
+ * - Android + Web: Falls back to Feather icons from @expo/vector-icons
  *
- * This is the single place to change icon system in the future.
+ * This is the single source of truth for icons in the app.
  */
-export function Icon({ name, size = 24, color = "#000", style }: IconProps) {
-  // On iOS we can try expo-symbols for native look.
-  // For simplicity and reliability across web + all platforms,
-  // we use Feather everywhere for now (most stable on web export).
-  return <Feather name={name} size={size} color={color} style={style} />;
+export function Icon({ name, size = 24, color = "#000", style, weight = "regular" }: IconProps) {
+  if (Platform.OS === "ios") {
+    // Try to use native SF Symbol if possible
+    return (
+      <SymbolView
+        name={name as any}
+        size={size}
+        tintColor={color}
+        weight={weight}
+        style={style}
+      />
+    );
+  }
+
+  // Fallback for Android and Web (Feather is reliable here)
+  return <Feather name={name as any} size={size} color={color} style={style} />;
 }
