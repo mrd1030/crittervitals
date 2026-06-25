@@ -213,7 +213,7 @@ export default function PetProfile() {
           )}
         </View>
       </ScrollView>
-    </View>
+     </View>
    </View>
   );
 }
