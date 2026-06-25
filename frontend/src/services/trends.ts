@@ -52,30 +52,30 @@ export function weightDelta(logs: LogEntry[], days = 7): number | null {
   return last.value - past.value;
 }
 
-// Adherence = medication-taken logs vs expected doses across the active window.
+// Fixed adherence calculation for last N days.
+// Expected = number of days in window * frequency per day (per active med)
 export function computeAdherence(
   logs: LogEntry[],
   meds: Medication[],
-  days = 14,
+  days = 7,
 ): AdherenceResult {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - days);
   const cutoffIso = cutoff.toISOString();
+
   const activeMeds = meds.filter((m) => m.active);
 
   const perMed = activeMeds.map((m) => {
-    const startMs = Math.max(new Date(m.startDate).getTime(), cutoff.getTime());
-    const elapsedDays = Math.max(
-      1,
-      Math.ceil((Date.now() - startMs) / (1000 * 60 * 60 * 24)),
-    );
-    const expected = elapsedDays * m.frequencyPerDay;
+    // Expected doses in the window = days * frequencyPerDay
+    const expected = days * m.frequencyPerDay;
+
     const taken = logs.filter(
       (l) =>
         l.type === "medication" &&
         l.medicationId === m.id &&
         l.loggedAt >= cutoffIso,
     ).length;
+
     return {
       name: m.name,
       taken,
@@ -86,6 +86,7 @@ export function computeAdherence(
 
   const expected = perMed.reduce((s, m) => s + m.expected, 0);
   const taken = perMed.reduce((s, m) => s + m.taken, 0);
+
   return {
     expected,
     taken,
@@ -118,7 +119,6 @@ export function energySeries(logs: LogEntry[]): { value: number; label: string }
     .map((l) => ({ value: l.energyLevel as number, label: shortDate(l.loggedAt) }));
 }
 
-// Plain-language insights for the dashboard / trends header.
 export function buildInsights(logs: LogEntry[], meds: Medication[]): string[] {
   const insights: string[] = [];
   const delta = weightDelta(logs, 7);
