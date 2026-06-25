@@ -1,8 +1,8 @@
 import { Tabs } from "expo-router";
-import { Feather } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/src/theme/useTheme";
+import { Icon } from "@/src/components/Icon";
 
 export default function TabsLayout() {
   const t = useTheme();
@@ -30,28 +30,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, focused }) => <Feather name="home" size={focused ? 23 : 22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="home" size={focused ? 23 : 22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="medications"
         options={{
           title: "Meds",
-          tabBarIcon: ({ color, focused }) => <Feather name="clock" size={focused ? 23 : 22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="clock" size={focused ? 23 : 22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="photos"
         options={{
           title: "Photos",
-          tabBarIcon: ({ color, focused }) => <Feather name="camera" size={focused ? 23 : 22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="camera" size={focused ? 23 : 22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="trends"
         options={{
           title: "Trends",
-          tabBarIcon: ({ color, focused }) => <Feather name="trending-up" size={focused ? 23 : 22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="trending-up" size={focused ? 23 : 22} color={color} />,
         }}
       />
     </Tabs>

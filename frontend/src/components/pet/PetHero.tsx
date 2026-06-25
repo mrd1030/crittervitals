@@ -2,11 +2,11 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/src/theme/useTheme";
-import { Display, Txt, Badge } from "@/src/components/ui";
+import { Display, Txt } from "@/src/components/ui";
+import { Icon } from "@/src/components/Icon";
 import { Pet } from "@/src/models/types";
 import { SPECIES_TEMPLATES } from "@/src/constants/species";
 
@@ -41,7 +41,7 @@ export function PetHero({ pet, onBack, onChangePhoto, onEdit }: PetHeroProps) {
           hitSlop={10}
           style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "center", justifyContent: "center" }}
         >
-          <Feather name="chevron-left" size={26} color="#fff" />
+          <Icon name="chevron-left" size={26} color="#fff" />
         </Pressable>
 
         <View style={{ flexDirection: "row", gap: 10 }}>
@@ -49,13 +49,13 @@ export function PetHero({ pet, onBack, onChangePhoto, onEdit }: PetHeroProps) {
             onPress={onChangePhoto}
             style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "center", justifyContent: "center" }}
           >
-            <Feather name="camera" size={20} color="#fff" />
+            <Icon name="camera" size={20} color="#fff" />
           </Pressable>
           <Pressable
             onPress={onEdit}
             style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "center", justifyContent: "center" }}
           >
-            <Feather name="edit-2" size={18} color="#fff" />
+            <Icon name="edit-2" size={18} color="#fff" />
           </Pressable>
         </View>
       </View>
