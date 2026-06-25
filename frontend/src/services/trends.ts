@@ -73,7 +73,7 @@ export function computeAdherence(
   const activeMeds = meds.filter((m) => m.active);
 
   let totalExpected = 0;
-  const perMedMap = new Map<string, { taken: number; expected: number }();
+  const perMedMap = new Map<string, { taken: number; expected: number }>();
 
   // Initialize per-med tracking
   activeMeds.forEach((m) => {
