@@ -6,13 +6,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/src/theme/useTheme";
 import { useData } from "@/src/store/DataContext";
-import { Display, Txt, Card, AppButton, SectionHeader, Divider, Badge } from "@/src/components/ui";
+import { Display, Txt, Card, AppButton, SectionHeader, Badge } from "@/src/components/ui";
 import { useToast } from "@/src/components/Toast";
 import * as Notifications from "expo-notifications";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import { PetRepo, MedicationRepo, LogRepo, PhotoRepo } from "@/src/repositories";
 import { requestNotificationPermission, getPermissionStatus } from "@/src/services/reminders";
+import { Header } from "@/src/components/Header";
 
 export default function Settings() {
   const t = useTheme();
@@ -85,12 +86,12 @@ export default function Settings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.surface }}>
+      <Header title="Settings" showBack />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: t.spacing.lg, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{ padding: t.spacing.lg, paddingTop: t.spacing.md, paddingBottom: insets.bottom + 40 }}
       >
-        <Display size={28} style={{ marginBottom: t.spacing.lg }}>Settings</Display>
-
         {/* Notifications */}
         <SectionHeader title="Notifications" />
         <Card style={{ marginBottom: t.spacing.lg }}>
