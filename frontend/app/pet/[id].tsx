@@ -77,6 +77,25 @@ export default function PetProfile() {
     router.replace("/(tabs)");
   };
 
+  // NEW FEATURE 1: Mark all today's medications as taken
+  const markAllMedsToday = async () => {
+    if (!activePet) return;
+    const todayDoses = meds.filter(m => m.active);
+    for (const med of todayDoses) {
+      await LogRepo.insert({
+        petId: activePet.id,
+        type: "medication",
+        loggedAt: new Date().toISOString(),
+        medicationId: med.id,
+        medicationName: med.name,
+        dosageGiven: `${med.dosage} ${med.unit}`,
+      });
+    }
+    toast.show(`Marked ${todayDoses.length} medications as taken`, "success");
+    bump();
+    load();
+  };
+
   const deletePet = async () => {
     await PetRepo.remove(pet.id);
     await refresh();
@@ -88,7 +107,7 @@ export default function PetProfile() {
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.surface }}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
-        {/* Hero with mandatory dark scrim behind the name */}
+        {/* Hero */}
         <View style={{ height: heroH }}>
           {pet.photoUri ? (
             <Image source={{ uri: pet.photoUri }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
@@ -135,7 +154,6 @@ export default function PetProfile() {
             <AppButton title="Make Active Pet" icon="check-circle" variant="ghost" onPress={makeActive} style={{ marginBottom: t.spacing.md }} testID="profile-make-active" />
           )}
 
-          {/* Go back to Home */}
           <AppButton
             title="Back to Home"
             icon="home"
@@ -143,6 +161,16 @@ export default function PetProfile() {
             onPress={goHome}
             style={{ marginBottom: t.spacing.lg }}
           />
+
+          {/* NEW FEATURE: Mark all today's meds */}
+          {meds.filter(m => m.active).length > 0 && (
+            <AppButton
+              title={`Mark All ${meds.filter(m => m.active).length} Meds as Taken`}
+              icon="check-circle"
+              onPress={markAllMedsToday}
+              style={{ marginBottom: t.spacing.lg }}
+            />
+          )}
 
           {/* Health metrics */}
           <Card style={{ marginBottom: t.spacing.lg }}>
