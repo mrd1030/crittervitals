@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -75,13 +75,26 @@ export default function Settings() {
     }
   };
 
-  const handleClearData = async () => {
-    setBusy(true);
-    await clearAllData();
-    await refresh();
-    toast.show("All data cleared", "info");
-    setBusy(false);
-    router.replace("/onboarding");
+  const handleClearData = () => {
+    Alert.alert(
+      "Delete All Data?",
+      "This will permanently delete all pets, medications, logs, and photos. You will be taken back to the onboarding screen. This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete Everything",
+          style: "destructive",
+          onPress: async () => {
+            setBusy(true);
+            await clearAllData();
+            await refresh();
+            toast.show("All data cleared", "info");
+            setBusy(false);
+            router.replace("/onboarding");
+          },
+        },
+      ]
+    );
   };
 
   return (
